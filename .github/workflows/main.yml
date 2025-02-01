@@ -15,7 +15,7 @@ jobs:
     - name: Set up JDK 1.8
       uses: actions/setup-java@v4
       with:
-        java-version: '8.0.3028' # 使用一个具体的版本号
+        java-version: '8.0.302+8' # 使用一个具体的版本号
         distribution: 'adopt'
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
