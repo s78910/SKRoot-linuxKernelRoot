@@ -1,0 +1,52 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master ] # 只有在master分支上的push操作会触发此工作流程
+  pull_request:
+    branches: [ master ] # 只有针对master分支的PR会触发此工作流程
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # 使用最新版本的Ubuntu作为运行环境
+
+    steps:
+    - uses: actions/checkout@v3 # 检出仓库
+      with:
+        fetch-depth: 0 # 为了确保所有历史和标签都被检出，这对于一些依赖版本号的构建脚本可能很重要
+
+    - name: Set up JDK 1.8 # 安装Java 1.8，根据您的项目需求，版本号可能需要更改
+      uses: actions/setup-java@v3
+      with:
+        java-version: '1.8'
+        distribution: 'adopt'
+
+    - name: Make Gradlew Executable
+      run: chmod +x PermissionManager/gradlew
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x PermissionManager/gradlew
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Cache Gradle Wrapper
+      uses: actions/cache@v3
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+
+    - name: Build APK
+      working-directory: PermissionManager # 切换到PermissionManager目录
+      run: ./gradlew assembleDebug # 构建Debug版本的APK，根据需要可以更改为assembleRelease或其他任务
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug.apk # 上传的文件名
+        path: PermissionManager/app/build/outputs/apk/debug/app-debug.apk # APK的路径，确保与实际输出路径匹配
